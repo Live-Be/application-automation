@@ -1,0 +1,971 @@
+{
+  "name": "0102new",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "job-application-agent",
+        "options": {}
+      },
+      "id": "79880751-6cd1-4f2b-a000-8a4fe79866c3",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        768,
+        256
+      ],
+      "typeVersion": 2,
+      "webhookId": "79880751-6cd1-4f2b-a000-8a4fe79866c3"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "=1cynSif1GlWjKMJS6W8lgutk_Vk8vfnvJxfnl5qiQKRk"
+      },
+      "id": "558f40a9-48f1-491e-a151-4fbfdcd36ac2",
+      "name": "Get a document",
+      "type": "n8n-nodes-base.googleDocs",
+      "position": [
+        976,
+        256
+      ],
+      "typeVersion": 2,
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "B8lpNyJER8guwEmU",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/datasets/UcjFi5Nz2VQAZe0FG/items?clean=true&format=json&limit=25",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "910c2a43-0736-4c2c-8126-5b54fc280b84",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1200,
+        256
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a strict job-fit evaluator. You receive a job posting and a candidate profile. Decide whether the candidate is a reasonable fit. Return ONLY a single valid JSON object with exactly these five fields:\n- \"verdict\": boolean true or false (MUST be a JSON boolean, NOT a string)\n- \"title\": the exact job title copied verbatim from the input\n- \"companyName\": the exact company name copied verbatim from the input\n- \"link\": the exact job URL copied verbatim from the input\n- \"descriptionText\": the full job description text copied verbatim from the input\nNo markdown, no explanation, no extra keys.",
+              "role": "system"
+            },
+            {
+              "content": "={{ `Here is a block of context about me and my skills:\n\n- AI, Machine Learning, Automation, n8n, Python, Data Engineering\n- Project Management, Stakeholder Communication, Agile\n- 10+ years experience in tech and digital transformation\n- Located in Austria (Tirol), open to remote and DACH region\n\n--\n\nHere is the job posting:\n\nTitle: ${ $json.title || $json.positionName || '' }\nCompany: ${ $json.companyName || $json.company || '' }\nLink: ${ $json.link || $json.url || '' }\nLocation: ${ $json.location || '' }\n\nFull description:\n${ $json.descriptionText || $json.description || $json.descriptionHtml || '' }\n\n--\n\nReturn ONLY this JSON (no other text):\n{\"verdict\": true or false, \"title\": \"exact title from above\", \"companyName\": \"exact company from above\", \"link\": \"exact link from above\", \"descriptionText\": \"full description from above\"}` }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "30b8fe90-a107-48ea-a423-91e8002afd95",
+      "name": "Message a model",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        1664,
+        256
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "929zndRVMxqFLcaf",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "id": "90e00274-02c7-4166-a845-64e5c03b4cce",
+      "name": "Limit",
+      "type": "n8n-nodes-base.limit",
+      "position": [
+        1392,
+        256
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "6528ca5e-a675-47a3-b2d5-e8ad4b379e02",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.message && $json.message.content && ($json.message.content.verdict === true || String($json.message.content.verdict).toLowerCase() === 'true') }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3012944b-01f3-4a07-964a-0f2858b7fd73",
+      "name": "Filter",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        2016,
+        256
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Du bist ein erfahrener Bewerbungsberater. Schreibe ein professionelles, massgeschneidertes Anschreiben auf Deutsch. Das Anschreiben soll praezise auf die Stellenausschreibung eingehen und die relevanten Qualifikationen des Kandidaten hervorheben. Gib nur den Anschreiben-Text aus, ohne zusaetzliche Kommentare.",
+              "role": "system"
+            },
+            {
+              "content": "={{ `Schreibe ein massgeschneidertes Anschreiben fuer folgende Stelle:\n\nStellentitel: ${$json.message.content.title || ''}\nUnternehmen: ${$json.message.content.companyName || ''}\nLink: ${$json.message.content.link || ''}\nStellenbeschreibung:\n${$json.message.content.descriptionText || ''}\n\n---\n\nLebenslauf / Profil des Kandidaten:\n${$('Get a document').first().json.body?.content?.map(c => c.paragraph?.elements?.map(e => e.textRun?.content || '').join('')).filter(Boolean).join('\\n') || 'Nicht verfuegbar'}\n\nSchreibe ein professionelles Anschreiben, das die relevantesten Erfahrungen und Faehigkeiten fuer diese Position hervorhebt.` }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "8395402a-24e4-405a-a90f-0a7d3b61de0a",
+      "name": "Message a model1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2480,
+        256
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "929zndRVMxqFLcaf",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "id": "b89dea4e-5729-427d-ad18-25f22bfe0b6e",
+      "name": "Limit1",
+      "type": "n8n-nodes-base.limit",
+      "position": [
+        2224,
+        256
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anymailfinder.com/v5.1/find-email/decision-maker",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "domain",
+              "value": "={{ $('Limit').item.json.companyWebsite }}"
+            },
+            {
+              "name": "decision_maker_category",
+              "value": "ceo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "eaaa7376-7614-45b0-b0c0-4680f2a8fd35",
+      "name": "HTTP Request2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2336,
+        944
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Anymail Finder API Key"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "4ba14283-df7a-49f5-90d2-8d827b48f7e4",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.email }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6489befc-0859-4e99-ba56-f75018ebb5fa",
+      "name": "Filter1",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        2592,
+        912
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": "={{ $('Create file from text').item.json.id }}",
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "id": "d76b9026-6e24-470b-8714-4aa7ddeab00a",
+      "name": "Share file",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1264,
+        736
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "4wPBiX6KMuDmOgkq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# AI Job Application Agent\n---\n### **Overview**\nThis workflow acts as your personal AI recruiter. It automates the end-to-end process of finding high-quality jobs, tailoring your resume, and drafting personalized outreach emails.\n\n---\n### **How it Works:**\n\n**1. Scrape & Search**\n* Fetches your **\"Master Resume\"** from Google Docs.\n* Uses **Apify** to scrape real-time LinkedIn job postings based on keywords (e.g., \"AI Automation\").\n\n**2. Intelligent Filtering**\n* **AI Screener:** Uses **GPT-4.1-mini** to analyze job descriptions against your skills.\n* **Verdict:** Automatically discards jobs if you aren't a fit or company data is missing.\n\n**3. Hyper-Personalization**\n* **Tailoring:** Uses **GPT-4.1** to rewrite your resume specifically for the role.\n* **Formatting:** Converts AI output into clean HTML for the document.\n\n**4. Document Generation**\n* Creates a unique **Google Doc** for each application.\n* Uploads the customized resume and sets sharing permissions.\n\n**5. Enrichment & Outreach**\n* **Headhunting:** Uses **Anymail Finder** to locate the CEO/Hiring Manager's email.\n* **Drafting:** Creates a **Gmail** draft with your pitch and resume link.\n\n---\n### **Setup Requirements**\n* **Google Drive/Docs:** Storage & creation.\n* **Apify Account:** LinkedIn Job Scraper.\n* **OpenAI API:** Analysis (GPT-4.1).\n* **Anymail Finder:** Email enrichment.\n* **Gmail:** Sending drafts.",
+        "height": 992,
+        "width": 544
+      },
+      "id": "b629fd8c-5f71-4006-9af3-a78e4fa997c7",
+      "name": "Main Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        -112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Fetches your master resume, scrapes LinkedIn job postings, and prepares raw data for further AI-based filtering.",
+        "height": 100,
+        "width": 250,
+        "color": 6
+      },
+      "id": "fe2bf1cf-263c-44c7-9df6-e5f9da648ff6",
+      "name": "STICKY 1 – Input & Scraping",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        976,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "GPT analyzes each job description, removes irrelevant leads, and limits results to the top matches.",
+        "height": 100,
+        "width": 250,
+        "color": 6
+      },
+      "id": "cf95823a-548e-4e7b-b9a0-81dddc00622c",
+      "name": "STICKY 2 – AI Filtering",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1776,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "GPT rewrites your resume based on the selected job description and converts the final output into HTML.",
+        "height": 100,
+        "width": 250,
+        "color": 6
+      },
+      "id": "4346fa8e-aee6-4a20-b06c-48fd1ffb71b3",
+      "name": "STICKY 3 – Resume Writer",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2480,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Creates a Google Doc, uploads the rewritten resume, and adjusts sharing settings.",
+        "height": 100,
+        "width": 250,
+        "color": 6
+      },
+      "id": "f556bc45-f5b0-42ce-a5c4-fc7e7c09cbbd",
+      "name": "STICKY 4 – Google Docs",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1008,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Finds the CEO’s verified email via Anymail, validates it, and creates a cold email draft in Gmail.",
+        "height": 100,
+        "width": 250,
+        "color": 6
+      },
+      "id": "a47c7663-943a-428f-bac2-c27d46b9daea",
+      "name": "STICKY 5 – Email Outreach",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1968,
+        656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.subject || '' }}",
+        "message": "={{ $json.emailBody || '' }}",
+        "options": {}
+      },
+      "id": "c349fa9c-a641-4926-bf8e-b9e5add568e6",
+      "name": "Create a draft",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1344,
+        528
+      ],
+      "webhookId": "bbb96f8a-42dc-4dae-9866-de16a8db8eb5",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MkRSPdkOaufrPYdJ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "={{ $('Message a model2').item.json.message.content || '' }}",
+        "name": "={{ 'Lebenslauf - ' + ($json.message.content.title || 'Stelle') + ' - ' + ($json.message.content.companyName || 'Unternehmen') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        832,
+        528
+      ],
+      "id": "a02f5d95-0428-4585-886d-75bd59f24c0a",
+      "name": "Create file from text",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "4wPBiX6KMuDmOgkq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eee941ca-ba5c-4c0c-ac84-df83d50efd72",
+              "name": "title",
+              "value": "={{ $('Limit1').item.json.message.content.title || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "4e6755a3-86d4-417a-b21c-f8e44471463f",
+              "name": "companyName",
+              "value": "={{ $('Limit1').item.json.message.content.companyName || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "f1446e79-373e-48a9-a05f-19cf5afa1c31",
+              "name": "jobLink",
+              "value": "={{ $('Limit1').item.json.message.content.link || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "073e959d-d20f-4cce-9b09-44f177908849",
+              "name": "coverDocId",
+              "value": "={{ $('Create cover letter from text').item.json.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "f002fc71-19b9-421d-b0ed-20231d92b2bd",
+              "name": "coverDocURL",
+              "value": "={{ 'https://docs.google.com/document/d/' + ($('Create cover letter from text').item.json.id || '') + '/edit?usp=sharing' }}",
+              "type": "string"
+            },
+            {
+              "id": "38c524b7-a6c4-4c5f-8b25-96115f6e83b6",
+              "name": "cvDocId",
+              "value": "={{ $('Create file from text').item.json.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "0935a300-c6e7-4978-8dff-b2a978273e19",
+              "name": "cvDocURL",
+              "value": "={{ 'https://docs.google.com/document/d/' + ($('Create file from text').item.json.id || '') + '/edit?usp=sharing' }}",
+              "type": "string"
+            },
+            {
+              "id": "docId",
+              "name": "docId",
+              "type": "string",
+              "value": "={{ $('Create file from text').item.json.id || '' }}"
+            },
+            {
+              "id": "docURL",
+              "name": "docURL",
+              "type": "string",
+              "value": "={{ 'https://docs.google.com/document/d/' + ($('Create file from text').item.json.id || '') + '/edit?usp=sharing' }}"
+            },
+            {
+              "id": "webViewLink",
+              "name": "webViewLink",
+              "value": "={{ 'https://docs.google.com/document/d/' + ($('Create file from text').item.json.id || '') + '/edit?usp=sharing' }}",
+              "type": "string"
+            },
+            {
+              "id": "documentId",
+              "name": "documentId",
+              "value": "={{ $('Create file from text').item.json.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "3ffa32e8-4416-47fc-b935-372f36562d77",
+              "name": "subject",
+              "value": "={{ 'Bewerbung: ' + ($('Limit1').item.json.message.content.title || '') + ' - ' + ($('Limit1').item.json.message.content.companyName || '') }}",
+              "type": "string"
+            },
+            {
+              "id": "emailBody01",
+              "name": "emailBody",
+              "type": "string",
+              "value": "={{ 'Hallo,\\n\\nich habe Ihre Ausschreibung fuer die Position ' + ($('Limit1').item.json.message.content.title || '') + ' bei ' + ($('Limit1').item.json.message.content.companyName || '') + ' gesehen.\\n\\nZur schnellen Pruefung:\\n\\u2022 Stellenanzeige: ' + ($('Limit1').item.json.message.content.link || '') + '\\n\\u2022 Anschreiben: https://docs.google.com/document/d/' + ($('Create cover letter from text').item.json.id || '') + '/edit?usp=sharing\\n\\u2022 Lebenslauf: https://docs.google.com/document/d/' + ($('Create file from text').item.json.id || '') + '/edit?usp=sharing\\n\\nViele Gruesse\\nBernd Kaufmann' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1088,
+        528
+      ],
+      "id": "fa08cdf4-72dc-470b-8865-5f1b70f8111f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "Creates a Google Doc, uploads the rewritten resume, and adjusts sharing settings.",
+        "height": 100,
+        "width": 250,
+        "color": 6
+      },
+      "id": "d67e1a0e-1844-482e-9521-2ec29aad7b19",
+      "name": "STICKY 4 – Google Docs1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1520,
+        704
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "={{ $('Message a model1').item.json.message.content || '' }}",
+        "name": "={{ 'Anschreiben - ' + ($json.message.content.title || 'Stelle') + ' - ' + ($json.message.content.companyName || 'Unternehmen') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1104,
+        720
+      ],
+      "id": "2718bb57-eb15-4914-b604-e01adf45f6a9",
+      "name": "Create cover letter from text",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "4wPBiX6KMuDmOgkq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": "={{ $('Create cover letter from text').item.json.id }}",
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "id": "39ba8575-6725-42d2-b683-703920d95c14",
+      "name": "Share cover letter",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1792,
+        928
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "4wPBiX6KMuDmOgkq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Du bist ein erfahrener Bewerbungsberater. Erstelle einen massgeschneiderten Lebenslauf auf Deutsch, der auf die jeweilige Stellenausschreibung zugeschnitten ist. Hebe die relevantesten Erfahrungen und Faehigkeiten hervor. Gib nur den Lebenslauf-Text aus, ohne zusaetzliche Kommentare.",
+              "role": "system"
+            },
+            {
+              "content": "={{ `Erstelle einen massgeschneiderten Lebenslauf fuer folgende Stelle:\n\nStellentitel: ${$('Limit1').item.json.message.content.title || ''}\nUnternehmen: ${$('Limit1').item.json.message.content.companyName || ''}\nStellenbeschreibung:\n${$('Limit1').item.json.message.content.descriptionText || ''}\n\n---\n\nOriginal-Lebenslauf des Kandidaten:\n${$('Get a document').first().json.body?.content?.map(c => c.paragraph?.elements?.map(e => e.textRun?.content || '').join('')).filter(Boolean).join('\\n') || 'Nicht verfuegbar'}\n\nErstelle einen professionellen, auf die Stelle zugeschnittenen Lebenslauf.` }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "dd5210bc-9740-4645-b6a1-3ea1cd1108c8",
+      "name": "Message a model2",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2752,
+        496
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "929zndRVMxqFLcaf",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "photoUrl",
+              "value": "={{ $json.photoUrl || '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b9b5d3e1-d019-4126-9182-f0d81c3aff6a",
+      "name": "Set photo url",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.photoUrl }}",
+              "operation": "notEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a46f1f25-634d-40fc-acce-c4350ae74032",
+      "name": "If photo url",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://docs.googleapis.com/v1/documents/{{ $('Create cover letter from text').item.json.id }}:batchUpdate",
+        "authentication": "oAuth2",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "51ac1e71-e702-4007-9f43-17e842a93d75",
+      "name": "Add photo to cover doc",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1872,
+        256
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://docs.googleapis.com/v1/documents/{{ $('Create file from text').item.json.id }}:batchUpdate",
+        "authentication": "oAuth2",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "3478bc7c-3921-42a3-9055-1b984ef7666a",
+      "name": "Add photo to cv doc",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1872,
+        416
+      ],
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Limit1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit1": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Create cover letter from text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create file from text": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set photo url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create cover letter from text": {
+      "main": [
+        [
+          {
+            "node": "Share cover letter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share cover letter": {
+      "main": [
+        [
+          {
+            "node": "Message a model2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model2": {
+      "main": [
+        [
+          {
+            "node": "Create file from text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set photo url": {
+      "main": [
+        [
+          {
+            "node": "If photo url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If photo url": {
+      "main": [
+        [
+          {
+            "node": "Add photo to cover doc",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add photo to cv doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "0417a81f-40cf-4bcf-b150-ab29c4af6bac",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b616ba1d221c29f342a144b3696fe2da47e1e6c645de24f13d7d8cad2adaac15"
+  },
+  "id": "ac-jsMYkTmH6Q2myQXRWc",
+  "tags": []
+}
