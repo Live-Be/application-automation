@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "GET",
+        "httpMethod": "POST",
         "path": "job-application-agent",
         "options": {}
       },
