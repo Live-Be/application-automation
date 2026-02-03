@@ -161,11 +161,11 @@
         "messages": {
           "values": [
             {
-              "content": "Du bist ein erfahrener Bewerbungsberater. Schreibe ein professionelles, massgeschneidertes Anschreiben auf Deutsch. Das Anschreiben soll praezise auf die Stellenausschreibung eingehen und die relevanten Qualifikationen des Kandidaten hervorheben. Gib nur den Anschreiben-Text aus, ohne zusaetzliche Kommentare.",
+              "content": "Du bist ein erfahrener Bewerbungsberater. Schreibe ein KURZES, praegnantes und professionelles Anschreiben auf Deutsch (maximal 150-200 Woerter). Das Anschreiben soll kompakt und auf den Punkt sein - keine langen Einleitungen oder Floskeln. Fokussiere dich auf die 2-3 wichtigsten Qualifikationen fuer die Stelle. Beginne das Dokument IMMER mit folgendem Header (zentriert):\n\nBernd Kaufmann\nOberndorferstrasse 27 ● A - 6322 Kirchbichl ● Email: bernd.kaufmann82@gmail.com\nMobil (A): +43 670 507 5514 ● LinkedIn: Bernd Kaufmann\n\nDanach folgt das eigentliche Anschreiben. Gib nur den Text aus, ohne zusaetzliche Kommentare.",
               "role": "system"
             },
             {
-              "content": "={{ `Schreibe ein massgeschneidertes Anschreiben fuer folgende Stelle:\n\nStellentitel: ${$json.message.content.title || ''}\nUnternehmen: ${$json.message.content.companyName || ''}\nLink: ${$json.message.content.link || ''}\nStellenbeschreibung:\n${$json.message.content.descriptionText || ''}\n\n---\n\nLebenslauf / Profil des Kandidaten:\n${$('Get a document').first().json.body?.content?.map(c => c.paragraph?.elements?.map(e => e.textRun?.content || '').join('')).filter(Boolean).join('\\n') || 'Nicht verfuegbar'}\n\nSchreibe ein professionelles Anschreiben, das die relevantesten Erfahrungen und Faehigkeiten fuer diese Position hervorhebt.` }}"
+              "content": "={{ `Schreibe ein KURZES, praegnantes Anschreiben (max. 150-200 Woerter) fuer folgende Stelle:\n\nStellentitel: ${$json.message.content.title || ''}\nUnternehmen: ${$json.message.content.companyName || ''}\nLink: ${$json.message.content.link || ''}\nStellenbeschreibung:\n${$json.message.content.descriptionText || ''}\n\n---\n\nLebenslauf / Profil des Kandidaten:\n${$('Get a document').first().json.body?.content?.map(c => c.paragraph?.elements?.map(e => e.textRun?.content || '').join('')).filter(Boolean).join('\\n') || 'Nicht verfuegbar'}\n\nWICHTIG: Das Anschreiben muss kurz und praegnant sein (ca. 1/3 kuerzer als ein normales Anschreiben). Keine langen Einleitungen. Direkt auf den Punkt kommen. Beginne mit dem Header mit meinen Kontaktdaten.` }}"
             }
           ]
         },
@@ -396,13 +396,23 @@
     },
     {
       "parameters": {
-        "resource": "draft",
+        "resource": "message",
+        "sendTo": "bernd.kaufmann82@gmail.com",
         "subject": "={{ $json.subject || '' }}",
+        "emailType": "text",
         "message": "={{ $json.emailBody || '' }}",
-        "options": {}
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "attachments"
+              }
+            ]
+          }
+        }
       },
       "id": "c349fa9c-a641-4926-bf8e-b9e5add568e6",
-      "name": "Create a draft",
+      "name": "Send Email to Inbox",
       "type": "n8n-nodes-base.gmail",
       "position": [
         1344,
@@ -636,11 +646,11 @@
         "messages": {
           "values": [
             {
-              "content": "Du bist ein erfahrener Bewerbungsberater. Erstelle einen massgeschneiderten Lebenslauf auf Deutsch, der auf die jeweilige Stellenausschreibung zugeschnitten ist. Hebe die relevantesten Erfahrungen und Faehigkeiten hervor. Gib nur den Lebenslauf-Text aus, ohne zusaetzliche Kommentare.",
+              "content": "Du bist ein erfahrener Bewerbungsberater. Erstelle einen massgeschneiderten Lebenslauf auf Deutsch fuer Bernd Kaufmann, der auf die jeweilige Stellenausschreibung zugeschnitten ist. Hebe die relevantesten Erfahrungen und Faehigkeiten hervor. Beginne das Dokument IMMER mit folgendem Header (zentriert):\n\nLEBENSLAUF\nBernd Kaufmann\nOberndorferstrasse 27 ● A - 6322 Kirchbichl ● Email: bernd.kaufmann82@gmail.com\nMobil (A): +43 670 507 5514 ● LinkedIn: Bernd Kaufmann\n\nOrientiere dich strikt an der Struktur und dem Format des Master-Lebenslaufs. Gib nur den Lebenslauf-Text aus, ohne zusaetzliche Kommentare.",
               "role": "system"
             },
             {
-              "content": "={{ `Erstelle einen massgeschneiderten Lebenslauf fuer folgende Stelle:\n\nStellentitel: ${$('Limit1').item.json.message.content.title || ''}\nUnternehmen: ${$('Limit1').item.json.message.content.companyName || ''}\nStellenbeschreibung:\n${$('Limit1').item.json.message.content.descriptionText || ''}\n\n---\n\nOriginal-Lebenslauf des Kandidaten:\n${$('Get a document').first().json.body?.content?.map(c => c.paragraph?.elements?.map(e => e.textRun?.content || '').join('')).filter(Boolean).join('\\n') || 'Nicht verfuegbar'}\n\nErstelle einen professionellen, auf die Stelle zugeschnittenen Lebenslauf.` }}"
+              "content": "={{ `Erstelle einen massgeschneiderten Lebenslauf fuer Bernd Kaufmann fuer folgende Stelle:\n\nStellentitel: ${$('Limit1').item.json.message.content.title || ''}\nUnternehmen: ${$('Limit1').item.json.message.content.companyName || ''}\nStellenbeschreibung:\n${$('Limit1').item.json.message.content.descriptionText || ''}\n\n---\n\nMaster-Lebenslauf von Bernd Kaufmann (dieses Format und diese Struktur beibehalten!):\n${$('Get a document').first().json.body?.content?.map(c => c.paragraph?.elements?.map(e => e.textRun?.content || '').join('')).filter(Boolean).join('\\n') || 'Nicht verfuegbar'}\n\nWICHTIG: \n1. Beginne mit dem Header mit Namen und Kontaktdaten\n2. Orientiere dich strikt am Format und der Struktur des Master-Lebenslaufs oben\n3. Passe nur die Inhalte an, um die relevantesten Erfahrungen fuer diese Stelle hervorzuheben\n4. Der Name 'Bernd Kaufmann' muss deutlich sichtbar sein` }}"
             }
           ]
         },
