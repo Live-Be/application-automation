@@ -398,9 +398,9 @@
       "parameters": {
         "resource": "message",
         "sendTo": "bernd.kaufmann82@gmail.com",
-        "subject": "={{ $json.subject || '' }}",
+        "subject": "={{ $('Edit Fields').item.json.subject || '' }}",
         "emailType": "text",
-        "message": "={{ $json.emailBody || '' }}",
+        "message": "={{ $('Edit Fields').item.json.emailBody || '' }}",
         "options": {
           "attachmentsUi": {
             "attachmentsBinary": [
@@ -760,6 +760,153 @@
         416
       ],
       "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "filesList",
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1MzGo7eZRlPWdnTcAz5qksg8lgq-JYV58"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-list-dienstzeugnisse-01",
+      "name": "List Dienstzeugnisse",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1552,
+        400
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "4wPBiX6KMuDmOgkq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "binaryPropertyName": "attachments"
+        }
+      },
+      "id": "a1b2c3d4-download-dienstzeugnisse-01",
+      "name": "Download Dienstzeugnisse",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1760,
+        400
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "4wPBiX6KMuDmOgkq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "filesList",
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1BvCoLbjaENnsnwXL77q6V-YBQJxgoavh"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-list-ausbildungszeugnisse-01",
+      "name": "List Ausbildungszeugnisse",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1552,
+        656
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "4wPBiX6KMuDmOgkq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "binaryPropertyName": "attachments"
+        }
+      },
+      "id": "a1b2c3d4-download-ausbildungszeugnisse-01",
+      "name": "Download Ausbildungszeugnisse",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1760,
+        656
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "4wPBiX6KMuDmOgkq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "a1b2c3d4-aggregate-dienstzeugnisse-01",
+      "name": "Aggregate Dienstzeugnisse",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        1968,
+        400
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "a1b2c3d4-aggregate-ausbildungszeugnisse-01",
+      "name": "Aggregate Ausbildungszeugnisse",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        2384,
+        656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "a1b2c3d4-merge-attachments-01",
+      "name": "Merge Attachments",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        2592,
+        528
+      ],
+      "typeVersion": 3
     }
   ],
   "pinData": {},
@@ -889,7 +1036,12 @@
       "main": [
         [
           {
-            "node": "Create a draft",
+            "node": "List Dienstzeugnisse",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Ausbildungszeugnisse",
             "type": "main",
             "index": 0
           }
@@ -897,6 +1049,83 @@
         [
           {
             "node": "Set photo url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Dienstzeugnisse": {
+      "main": [
+        [
+          {
+            "node": "Download Dienstzeugnisse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Dienstzeugnisse": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Dienstzeugnisse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Dienstzeugnisse": {
+      "main": [
+        [
+          {
+            "node": "Merge Attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Ausbildungszeugnisse": {
+      "main": [
+        [
+          {
+            "node": "Download Ausbildungszeugnisse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Ausbildungszeugnisse": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Ausbildungszeugnisse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Ausbildungszeugnisse": {
+      "main": [
+        [
+          {
+            "node": "Merge Attachments",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Attachments": {
+      "main": [
+        [
+          {
+            "node": "Send Email to Inbox",
             "type": "main",
             "index": 0
           }
