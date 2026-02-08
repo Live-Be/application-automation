@@ -1,0 +1,101 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "1",
+      "name": "Täglich um 9 Uhr",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed/"
+      },
+      "id": "2",
+      "name": "AI News RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "prompt": "=Erstelle einen LinkedIn Post basierend auf dieser News: {{ $json.title }}. \nFokus: Gesellschaftliche Auswirkungen und Ethik. \nNutze einen nachdenklichen, professionellen Ton. \nInkludiere 3-5 Hashtags.",
+        "options": {}
+      },
+      "id": "3",
+      "name": "AI Content Creator",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "DEINE_TELEGRAM_CHAT_ID",
+        "text": "=Neuer Post-Entwurf:\n\n{{ $json.choices[0].message.content }}\n\nSoll dieser Post veröffentlicht werden?",
+        "replyMarkup": "inline_keyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "buttons": [
+                {
+                  "text": "✅ Veröffentlichen",
+                  "additionalFields": {
+                    "callback_data": "publish"
+                  }
+                },
+                {
+                  "text": "❌ Verwerfen",
+                  "additionalFields": {
+                    "callback_data": "discard"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "id": "4",
+      "name": "Warten auf Freigabe",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "text": "={{ $node[\"AI Content Creator\"].json[\"choices\"][0][\"message\"][\"content\"] }}"
+      },
+      "id": "5",
+      "name": "LinkedIn Post",
+      "type": "n8n-nodes-base.linkedin",
+      "typeVersion": 1,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "text": "={{ $node[\"AI Content Creator\"].json[\"choices\"][0][\"message\"][\"content\"].substring(0, 280) }}"
+      },
+      "id": "6",
+      "name": "X (Twitter) Post",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 1,
+      "position": [1250, 400]
+    }
+  ],
+  "connections": {
+    "Täglich um 9 Uhr": { "main": [ [ { "node": "AI News RSS", "index": 0 } ] ] },
+    "AI News RSS": { "main": [ [ { "node": "AI Content Creator", "index": 0 } ] ] },
+    "AI Content Creator": { "main": [ [ { "node": "Warten auf Freigabe", "index": 0 } ] ] },
+    "Warten auf Freigabe": { "main": [ [ { "node": "LinkedIn Post", "index": 0 }, { "node": "X (Twitter) Post", "index": 0 } ] ] }
+  }
+}
