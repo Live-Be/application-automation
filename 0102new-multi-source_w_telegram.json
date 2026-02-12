@@ -1,0 +1,1096 @@
+{
+  "name": "0102new-multi-source",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "job-application-agent-multi",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a3c148af-1f24-4851-b644-dff5a8ba8161",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -480,
+        336
+      ],
+      "typeVersion": 2,
+      "webhookId": "79880751-6cd1-4f2b-a000-8a4fe79866c3"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "=1Q2Q8X89JKxWRulrPDoSSnquN6FWvGf6eIQK9lEg1QV8"
+      },
+      "id": "48f62b0a-50b5-4d19-b368-f6a17bfd182d",
+      "name": "Get a document",
+      "type": "n8n-nodes-base.googleDocs",
+      "position": [
+        -272,
+        336
+      ],
+      "typeVersion": 2,
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "3IQ5o78ZG0YHKj1w",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/hKByXkMQaC5Qt9UMN/run-sync-get-dataset-items",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer apify_api_5MDR1JbPUtpzyguvvFX623sqro2HhH4bgmAN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"count\": 100,\n  \"scrapeCompany\": true,\n  \"urls\": [\n    \"https://www.linkedin.com/jobs/search/?keywords=ai%20automation&location=Austria\",\n    \"https://www.linkedin.com/jobs/search/?keywords=ai%20automation&location=Bavaria%2C%20Germany\"\n  ]\n}\n\n",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ae73ce78-02e8-417b-b949-0286ea9ebe5b",
+      "name": "LinkedIn Jobs"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/1gbgtCOza4hXSuu2u/run-sync-get-dataset-items?clean=true&format=json&limit=25",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {}
+      },
+      "id": "693748c2-210f-47a7-8a3b-437ef20aba5d",
+      "name": "Karriere.at_MachineLearning",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        0,
+        160
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/datasets/j57feEecHNkAyjuzb/items?clean=true&format=json&limit=25",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a61c34ce-a1f9-4c6e-ab61-04e6150e9211",
+      "name": "Unterland.jobs",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        0,
+        480
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "source-linkedin",
+              "name": "source",
+              "value": "LinkedIn",
+              "type": "string"
+            },
+            {
+              "id": "title-norm",
+              "name": "title",
+              "value": "={{ $json.title || $json.positionName || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "company-norm",
+              "name": "companyName",
+              "value": "={{ $json.companyName || $json.company || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "link-norm",
+              "name": "link",
+              "value": "={{ $json.link || $json.url || $json.jobUrl || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "location-norm",
+              "name": "location",
+              "value": "={{ $json.location || $json.jobLocation || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "description-norm",
+              "name": "descriptionText",
+              "value": "={{ $json.descriptionText || $json.description || $json.descriptionHtml || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "company-website",
+              "name": "companyWebsite",
+              "value": "={{ $json.companyWebsite || $json.companyUrl || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7eefea7a-2424-497b-8aff-271182925eca",
+      "name": "Normalize LinkedIn",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        240,
+        0
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "source-karriere",
+              "name": "source",
+              "value": "Karriere.at",
+              "type": "string"
+            },
+            {
+              "id": "title-norm",
+              "name": "title",
+              "value": "={{ $json.title || $json.jobTitle || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "company-norm",
+              "name": "companyName",
+              "value": "={{ $json.company || $json.companyName || $json.employer || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "link-norm",
+              "name": "link",
+              "value": "={{ $json.source_url || $json.apply_url || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "location-norm",
+              "name": "location",
+              "value": "={{ $json.location || $json.jobLocation || $json.region || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "description-norm",
+              "name": "descriptionText",
+              "value": "={{ $json.description_full || $json.description_snippet || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "company-website",
+              "name": "companyWebsite",
+              "value": "={{ $json.companyWebsite || $json.companyUrl || $json.employerUrl || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f2e51bc2-5a23-4a98-8159-6317f7069a19",
+      "name": "Normalize Karriere.at",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        240,
+        240
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "source-unterland",
+              "name": "source",
+              "value": "Unterland.jobs",
+              "type": "string"
+            },
+            {
+              "id": "title-norm",
+              "name": "title",
+              "value": "={{ $json.title || $json.jobTitle || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "company-norm",
+              "name": "companyName",
+              "value": "={{ $json.company || $json.companyName || $json.employer || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "link-norm",
+              "name": "link",
+              "value": "={{ $json.url || $json.link || $json.jobUrl || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "location-norm",
+              "name": "location",
+              "value": "={{ $json.location || $json.jobLocation || $json.region || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "description-norm",
+              "name": "descriptionText",
+              "value": "={{ $json.description || $json.jobDescription || $json.descriptionText || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "company-website",
+              "name": "companyWebsite",
+              "value": "={{ $json.companyWebsite || $json.companyUrl || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "666c6857-e5db-41db-bf08-21f9720985e3",
+      "name": "Normalize Unterland",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        240,
+        480
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {},
+      "id": "9c8661a7-17fc-4366-a2ae-d823119d7217",
+      "name": "Merge LinkedIn + Karriere",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        656,
+        144
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {},
+      "id": "1ebee52e-9dd5-4ea6-b23d-e81fab937d6e",
+      "name": "Merge All Sources",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        944,
+        272
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {},
+      "id": "6c986c26-9ba6-4378-b104-1427f24458e1",
+      "name": "Remove Duplicates",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "position": [
+        1104,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "maxItems": 20
+      },
+      "id": "4721a8d5-318f-49cf-be0c-f4605bdcf99b",
+      "name": "Limit",
+      "type": "n8n-nodes-base.limit",
+      "position": [
+        1264,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a strict job-fit evaluator. You receive a job posting and a candidate profile. Decide whether the candidate is a reasonable fit. Return ONLY a single valid JSON object with exactly these six fields:\n- \"verdict\": boolean true or false (MUST be a JSON boolean, NOT a string)\n- \"title\": the exact job title copied verbatim from the input\n- \"companyName\": the exact company name copied verbatim from the input\n- \"link\": the exact job URL copied verbatim from the input\n- \"descriptionText\": the full job description text copied verbatim from the input\n- \"source\": the job source (LinkedIn, Karriere.at, Unterland.jobs)\nNo markdown, no explanation, no extra keys.",
+              "role": "system"
+            },
+            {
+              "content": "={{ `Here is a block of context about me and my skills:\n\n- AI, Machine Learning, Automation, n8n, Python, Data Engineering\n- Project Management, Stakeholder Communication, Agile\n- 10+ years experience in tech and digital transformation\n- Located in Austria (Tirol), open to remote and DACH region\n\n--\n\nHere is the job posting:\n\nSource: ${ $json.source || 'Unknown' }\nTitle: ${ $json.title || '' }\nCompany: ${ $json.companyName || '' }\nLink: ${ $json.link || '' }\nLocation: ${ $json.location || '' }\n\nFull description:\n${ $json.descriptionText || '' }\n\n--\n\nReturn ONLY this JSON (no other text):\n{\"verdict\": true or false, \"title\": \"exact title from above\", \"companyName\": \"exact company from above\", \"link\": \"exact link from above\", \"descriptionText\": \"full description from above\", \"source\": \"source from above\"}` }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "ece6ef83-bc37-48fe-9517-0664f3f690b8",
+      "name": "GPT Job Filter",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        1424,
+        272
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "8neRb2Opeuqq5K5q",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "id": "2187e870-20be-4ec4-8402-011d94ef04df",
+      "name": "Limit Matches",
+      "type": "n8n-nodes-base.limit",
+      "position": [
+        1584,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Du bist ein erfahrener Bewerbungsberater. Schreibe ein professionelles, massgeschneidertes Anschreiben auf Deutsch. Das Anschreiben soll praezise auf die Stellenausschreibung eingehen und die relevanten Qualifikationen des Kandidaten hervorheben. Gib nur den Anschreiben-Text aus, ohne zusaetzliche Kommentare.",
+              "role": "system"
+            },
+            {
+              "content": "={{ `Schreibe ein massgeschneidertes Anschreiben fuer folgende Stelle:\n\nQuelle: ${$json.message.content.source || ''}\nStellentitel: ${$json.message.content.title || ''}\nUnternehmen: ${$json.message.content.companyName || ''}\nLink: ${$json.message.content.link || ''}\nStellenbeschreibung:\n${$json.message.content.descriptionText || ''}\n\n---\n\nLebenslauf / Profil des Kandidaten:\n${$('Get a document').first().json.content || 'Nicht verfuegbar'}\n\nSchreibe ein professionelles Anschreiben, das die relevantesten Erfahrungen und Faehigkeiten fuer diese Position hervorhebt.` }}\n"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "acf33939-47ed-4730-87a0-f2cf0cffd54d",
+      "name": "GPT Cover Letter",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        1744,
+        272
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "8neRb2Opeuqq5K5q",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "={{ $json.message.content || '' }}",
+        "name": "={{ 'Anschreiben - ' + ($('Limit Matches').item.json.message.content.title || 'Stelle') + ' - ' + ($('Limit Matches').item.json.message.content.companyName || 'Unternehmen') + ' (' + ($('Limit Matches').item.json.message.content.source || '') + ')' }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1904,
+        272
+      ],
+      "id": "c512753e-eb2f-4e20-8294-fa699ab8a4b6",
+      "name": "Create Cover Letter",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pdc9RimfgB9EayjS",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": "={{ $json.id }}",
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "id": "7cf5ea03-b51e-497d-9715-fd5d3240e0c2",
+      "name": "Share Cover Letter",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        2064,
+        272
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pdc9RimfgB9EayjS",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Du bist ein erfahrener Bewerbungsberater. Deine Aufgabe ist es, den Lebenslauf des Kandidaten für die jeweilige Stelle zu optimieren.\n\nWICHTIGE REGELN:\n1. Verwende AUSSCHLIESSLICH die Fakten aus dem Original-Lebenslauf des Kandidaten\n2. ERFINDE NIEMALS neue Berufserfahrungen, Ausbildungen, Firmen oder Qualifikationen\n3. Du darfst NUR:\n   - Die Reihenfolge der Punkte anpassen (relevanteste zuerst)\n   - Relevante Erfahrungen stärker hervorheben\n   - Weniger relevante Punkte kürzen oder weglassen\n   - Formulierungen verbessern, die den gleichen Inhalt ausdrücken\n4. Alle Firmen, Positionen, Zeiträume und Ausbildungen müssen EXAKT aus dem Original übernommen werden\n5. Schreibe auf Deutsch\n\nGib nur den Lebenslauf-Text aus, ohne zusätzliche Kommentare.\n",
+              "role": "system"
+            },
+            {
+              "content": "={{ `Erstelle einen massgeschneiderten Lebenslauf fuer folgende Stelle:\n\nQuelle: ${$('Limit Matches').item.json.message.content.source || ''}\nStellentitel: ${$('Limit Matches').item.json.message.content.title || ''}\nUnternehmen: ${$('Limit Matches').item.json.message.content.companyName || ''}\nStellenbeschreibung:\n${$('Limit Matches').item.json.message.content.descriptionText || ''}\n\n---\n\nOriginal-Lebenslauf des Kandidaten:\n${$('Get a document').first().json.content || 'Nicht verfuegbar'}\n\nErstelle einen professionellen, auf die Stelle zugeschnittenen Lebenslauf.` }}\n"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "e960fcc2-6a90-420c-b9f6-36576c11f0e5",
+      "name": "GPT CV",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2224,
+        272
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "8neRb2Opeuqq5K5q",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "={{ $json.message.content || '' }}",
+        "name": "={{ 'Lebenslauf - ' + ($('Limit Matches').item.json.message.content.title || 'Stelle') + ' - ' + ($('Limit Matches').item.json.message.content.companyName || 'Unternehmen') + ' (' + ($('Limit Matches').item.json.message.content.source || '') + ')' }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2384,
+        272
+      ],
+      "id": "7348973a-f01d-4662-b5a2-baee2afdf753",
+      "name": "Create CV",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pdc9RimfgB9EayjS",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": "={{ $json.id }}",
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "id": "21a5e93d-45e6-4c6d-9318-084edd6c0b2d",
+      "name": "Share CV",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        2544,
+        272
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pdc9RimfgB9EayjS",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "title",
+              "name": "title",
+              "value": "={{ $('Limit Matches').item.json.message.content.title || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "companyName",
+              "name": "companyName",
+              "value": "={{ $('Limit Matches').item.json.message.content.companyName || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "name": "source",
+              "value": "={{ $('Limit Matches').item.json.message.content.source || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "jobLink",
+              "name": "jobLink",
+              "value": "={{ $('Limit Matches').item.json.message.content.link || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "coverDocId",
+              "name": "coverDocId",
+              "value": "={{ $('Create Cover Letter').item.json.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "coverDocURL",
+              "name": "coverDocURL",
+              "value": "={{ 'https://docs.google.com/document/d/' + ($('Create Cover Letter').item.json.id || '') + '/edit?usp=sharing' }}",
+              "type": "string"
+            },
+            {
+              "id": "cvDocId",
+              "name": "cvDocId",
+              "value": "={{ $('Create CV').item.json.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "cvDocURL",
+              "name": "cvDocURL",
+              "value": "={{ 'https://docs.google.com/document/d/' + ($('Create CV').item.json.id || '') + '/edit?usp=sharing' }}",
+              "type": "string"
+            },
+            {
+              "id": "subject",
+              "name": "subject",
+              "value": "={{ 'Bewerbung: ' + ($('Limit Matches').item.json.message.content.title || '') + ' - ' + ($('Limit Matches').item.json.message.content.companyName || '') + ' (' + ($('Limit Matches').item.json.message.content.source || '') + ')' }}",
+              "type": "string"
+            },
+            {
+              "id": "emailBody",
+              "name": "emailBody",
+              "value": "={{ 'Hallo,\\n\\nich habe Ihre Ausschreibung fuer die Position ' + ($('Limit Matches').item.json.message.content.title || '') + ' bei ' + ($('Limit Matches').item.json.message.content.companyName || '') + ' auf ' + ($('Limit Matches').item.json.message.content.source || '') + ' gesehen.\\n\\nZur schnellen Pruefung:\\n• Stellenanzeige: ' + ($('Limit Matches').item.json.message.content.link || '') + '\\n• Anschreiben: https://docs.google.com/document/d/' + ($('Create Cover Letter').item.json.id || '') + '/edit?usp=sharing\\n• Lebenslauf: https://docs.google.com/document/d/' + ($('Create CV').item.json.id || '') + '/edit?usp=sharing\\n\\nViele Gruesse\\nBernd Kaufmann' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2704,
+        272
+      ],
+      "id": "024bcecc-1d6d-429f-a88c-b6a7cbb6ff55",
+      "name": "Prepare Email"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.subject || '' }}",
+        "message": "={{ $json.emailBody || '' }}",
+        "options": {}
+      },
+      "id": "3e072789-f4b7-4741-a212-a3c0668944e3",
+      "name": "Create Gmail Draft",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        2864,
+        272
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "cd56892a-b7c9-46d2-b348-093de225bcc2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jLw3GKuzaJDpmDtJ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 7
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "7d070d5d-58bb-43e0-b58a-010658123c6a",
+      "name": "Limit1"
+    },
+    {
+      "parameters": {
+        "maxItems": 7
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        448,
+        240
+      ],
+      "id": "27c83893-a54c-4491-b045-46ffa10dd34d",
+      "name": "Limit2"
+    },
+    {
+      "parameters": {
+        "maxItems": 7
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        448,
+        480
+      ],
+      "id": "d672d08e-852f-4b16-8401-b24dc7ad0ec8",
+      "name": "Limit3"
+    },
+    {
+      "parameters": {
+        "chatId": "livebernd@gmail.com",
+        "text": "=📝 Draft erstellt\n\nBetreff:\n{{$node[\"Prepare Email\"].json.subject}}\n\nFirma:\n{{$node[\"Prepare Email\"].json.companyName}}\n\nRolle:\n{{$node[\"Prepare Email\"].json.title}}\n\nQuelle:\n{{$node[\"Prepare Email\"].json.source}}\n\nJob Link:\n{{$node[\"Prepare Email\"].json.jobLink}}\n\nAnschreiben:\n{{$node[\"Prepare Email\"].json.coverDocURL}}\n\nLebenslauf:\n{{$node[\"Prepare Email\"].json.cvDocURL}}\n\nGmail Draft ID:\n{{$node[\"Create Gmail Draft\"].json.id}}\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3072,
+        272
+      ],
+      "id": "7a5975a4-4eb9-40f9-9761-953aaac29d07",
+      "name": "Send a text message",
+      "webhookId": "6200049d-9cfb-4ac8-8fe8-962bc710df8c",
+      "credentials": {
+        "telegramApi": {
+          "id": "NsWoLN3dnhFTRhOU",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"ok\": true,\n  \"draftId\": \"{{$node['Create Gmail Draft'].json.id}}\",\n  \"coverDocURL\": \"{{$node['Prepare Email'].json.coverDocURL}}\",\n  \"cvDocURL\": \"{{$node['Prepare Email'].json.cvDocURL}}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3280,
+        272
+      ],
+      "id": "90ae990b-0976-45ce-b8e8-fc8f7bf1d625",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Jobs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Karriere.at_MachineLearning",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Unterland.jobs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Normalize Karriere.at",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Jobs": {
+      "main": [
+        [
+          {
+            "node": "Normalize LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Karriere.at_MachineLearning": {
+      "main": [
+        [
+          {
+            "node": "Normalize Karriere.at",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unterland.jobs": {
+      "main": [
+        [
+          {
+            "node": "Normalize Unterland",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Limit1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Karriere.at": {
+      "main": [
+        [
+          {
+            "node": "Limit2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Unterland": {
+      "main": [
+        [
+          {
+            "node": "Limit3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge LinkedIn + Karriere": {
+      "main": [
+        [
+          {
+            "node": "Merge All Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Sources": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "GPT Job Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT Job Filter": {
+      "main": [
+        [
+          {
+            "node": "Limit Matches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit Matches": {
+      "main": [
+        [
+          {
+            "node": "GPT Cover Letter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT Cover Letter": {
+      "main": [
+        [
+          {
+            "node": "Create Cover Letter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Cover Letter": {
+      "main": [
+        [
+          {
+            "node": "Share Cover Letter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share Cover Letter": {
+      "main": [
+        [
+          {
+            "node": "GPT CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT CV": {
+      "main": [
+        [
+          {
+            "node": "Create CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create CV": {
+      "main": [
+        [
+          {
+            "node": "Share CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share CV": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email": {
+      "main": [
+        [
+          {
+            "node": "Create Gmail Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit1": {
+      "main": [
+        [
+          {
+            "node": "Merge LinkedIn + Karriere",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit2": {
+      "main": [
+        [
+          {
+            "node": "Merge LinkedIn + Karriere",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Limit3": {
+      "main": [
+        [
+          {
+            "node": "Merge All Sources",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Gmail Draft": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "e4c0650c-75b4-49f4-a670-cf7e0d8a3008",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d83a722e5fbb98cd8f641795d50e89a3f09c369c90a9f380ba55884fc9d2838c"
+  },
+  "id": "cCX2hd2BwfUCKXpcPXH7C",
+  "tags": []
+}
