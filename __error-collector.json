@@ -1,0 +1,79 @@
+{
+  "name": "__error-collector",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "error-trigger-001",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"workflowName\": \"{{ $json.workflow.name || 'Unknown' }}\",\n  \"workflowId\": \"{{ $json.workflow.id || 'Unknown' }}\",\n  \"executionId\": \"{{ $json.execution.id || 'Unknown' }}\",\n  \"nodeName\": \"{{ $json.execution.lastNodeExecuted || 'Unknown' }}\",\n  \"errorMessage\": \"{{ $json.execution.error.message || 'No message' }}\",\n  \"stackTop\": \"{{ ($json.execution.error.stack || '').split('\\n').slice(0, 3).join(' | ') }}\"\n}",
+        "options": {}
+      },
+      "id": "format-error-002",
+      "name": "Format Error Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "chatId": "SET_YOUR_CHAT_ID",
+        "text": "=**n8n Error Alert**\n\n**Workflow:** {{ $json.workflowName }} (ID: {{ $json.workflowId }})\n**Execution:** {{ $json.executionId }}\n**Failed Node:** {{ $json.nodeName }}\n\n**Error:** {{ $json.errorMessage }}\n\n**Stack:** {{ $json.stackTop }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-send-003",
+      "name": "Telegram SET_ME",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [440, 0],
+      "credentials": {
+        "telegramApi": {
+          "id": "SET_CREDENTIAL_ID",
+          "name": "SET_CREDENTIAL_NAME"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Error Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Error Data": {
+      "main": [
+        [
+          {
+            "node": "Telegram SET_ME",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "error-collector-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
