@@ -292,12 +292,42 @@
     },
     {
       "parameters": {
+        "maxItems": 7
+      },
+      "id": "limit-linkedin",
+      "name": "Limit LinkedIn",
+      "type": "n8n-nodes-base.limit",
+      "position": [540, -320],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "maxItems": 7
+      },
+      "id": "limit-karriere",
+      "name": "Limit Karriere.at",
+      "type": "n8n-nodes-base.limit",
+      "position": [540, -80],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "maxItems": 7
+      },
+      "id": "limit-unterland",
+      "name": "Limit Unterland",
+      "type": "n8n-nodes-base.limit",
+      "position": [540, 160],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
         "mode": "append"
       },
       "id": "merge-linkedin-karriere",
       "name": "Merge LinkedIn + Karriere",
       "type": "n8n-nodes-base.merge",
-      "position": [640, -200],
+      "position": [700, -200],
       "typeVersion": 3
     },
     {
@@ -307,7 +337,7 @@
       "id": "merge-all-sources",
       "name": "Merge All Sources",
       "type": "n8n-nodes-base.merge",
-      "position": [800, -40],
+      "position": [860, -40],
       "typeVersion": 3
     },
     {
@@ -737,6 +767,17 @@
       "main": [
         [
           {
+            "node": "Limit LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit LinkedIn": {
+      "main": [
+        [
+          {
             "node": "Merge LinkedIn + Karriere",
             "type": "main",
             "index": 0
@@ -748,6 +789,17 @@
       "main": [
         [
           {
+            "node": "Limit Karriere.at",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit Karriere.at": {
+      "main": [
+        [
+          {
             "node": "Merge LinkedIn + Karriere",
             "type": "main",
             "index": 1
@@ -756,6 +808,17 @@
       ]
     },
     "Normalize Unterland": {
+      "main": [
+        [
+          {
+            "node": "Limit Unterland",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit Unterland": {
       "main": [
         [
           {
